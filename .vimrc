@@ -55,3 +55,7 @@ nnoremap <leader>v :wincmd v<CR>
 nnoremap <leader>q :wincmd q<CR>
 nnoremap <leader>u :UndotreeShow u<CR>
 nnoremap <leader>pv :wincmd v<bar> :Ex <bar> :vertical resize 30<CR>
+
+nnoremap <silent> <leader>gd :YcmCompleter GoTo<CR>
+nnoremap <silent> <leader>gf :YcmCompleter FixIt<CR>
+
