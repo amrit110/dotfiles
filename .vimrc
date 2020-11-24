@@ -6,7 +6,7 @@ set shiftwidth=4
 set expandtab
 set smartindent
 set nu rnu
-set tw=80
+set nowrap
 set smartcase
 set noswapfile
 set nobackup
