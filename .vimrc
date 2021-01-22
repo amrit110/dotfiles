@@ -45,6 +45,7 @@ let g:netrw_browse_split = 3
 let g:netrw_winsize = 25
 let g:netrw_banner = 0
 
+inoremap jj <ESC>
 nnoremap <leader>h :wincmd h<CR>
 nnoremap <leader>j :wincmd j<CR>
 nnoremap <leader>k :wincmd k<CR>
