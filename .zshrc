@@ -117,5 +117,6 @@ if [ "$TERM" != "linux" ]; then
     install_powerline_precmd
 fi
 
-
+# vim keybindings
 bindkey -v
+bindkey jj vi-cmd-mode
