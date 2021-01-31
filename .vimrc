@@ -1,5 +1,4 @@
 syntax on
-
 set noerrorbells
 set tabstop=4 softtabstop=4
 set shiftwidth=4
@@ -16,14 +15,14 @@ set incsearch
 set colorcolumn=80
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
-call plug#begin('~/vim/plugged')
+call plug#begin('~/.vim/plugged')
 
 Plug 'morhetz/gruvbox'
 Plug 'jremmen/vim-ripgrep'
 Plug 'tpope/vim-fugitive'
 Plug 'vim-utils/vim-man'
 Plug 'lyuts/vim-rtags'
-Plug 'Valloric/YouCompleteMe', {'do': './install.py'}
+Plug 'Valloric/YouCompleteMe', {'do': './install.py --go-completer'}
 Plug 'mbbill/undotree'
 Plug 'kien/ctrlp.vim'
 
@@ -34,7 +33,7 @@ let g:gruvbox_contrast_dark=1
 autocmd vimenter * ++nested colorscheme gruvbox
 set background=dark
 
-let g:ycm_global_ycm_extra_conf='~/vim/plugged/YouCompleteMe/.ycm_extra_conf.py'
+let g:ycm_global_ycm_extra_conf='~/.vim/plugged/YouCompleteMe/.ycm_extra_conf.py'
 
 if executable('rg')
     let g:rg_derive_root='true'
