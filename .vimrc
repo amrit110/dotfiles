@@ -25,6 +25,7 @@ Plug 'lyuts/vim-rtags'
 Plug 'Valloric/YouCompleteMe', {'do': './install.py --go-completer'}
 Plug 'mbbill/undotree'
 Plug 'kien/ctrlp.vim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 call plug#end()
 
