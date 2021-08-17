@@ -31,6 +31,10 @@ bindkey jj vi-cmd-mode
 
 # custom aliases
 alias python=python3
+alias vim="nvim"
+alias tmux="TERM=screen-256color-bce tmux"
+alias ls="ls -lhFG"
+
 alias gs01="ssh amrit.krishnan@gpuserver01-mtl"
 alias gs02="ssh amrit.krishnan@gpuserver02-mtl"
 alias gs03="ssh amrit.krishnan@gpuserver03-mtl"
@@ -45,8 +49,6 @@ alias db01="ssh amrit.krishnan@dbserver01-mtl"
 alias st02="ssh amrit.krishnan@storage02-mtl"
 alias st01-mun="ssh amrit.krishnan@storage01-mun"
 alias linear="ssh amrit.krishnan@linear"
-alias vim='nvim'
-alias tmux="TERM=screen-256color-bce tmux"
 
 # funcs
 function backup() {
