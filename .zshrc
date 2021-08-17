@@ -57,3 +57,11 @@ function backup() {
     echo "Backed up $1 to $newname."
     cp -p $newname $1;
 }
+
+function dev_tmux() {
+    tmux new -s dev -d;
+    tmux rename-window -t 1 'Main';
+    tmux split-window -v 'htop';
+    tmux split-window -h -t 0;
+    tmux a -t dev;
+}
