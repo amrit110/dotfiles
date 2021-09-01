@@ -26,6 +26,7 @@ Plug 'Valloric/YouCompleteMe', {'do': './install.py --go-completer'}
 Plug 'mbbill/undotree'
 Plug 'kien/ctrlp.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'rust-lang/rust.vim'
 
 call plug#end()
 
@@ -56,5 +57,8 @@ nnoremap <leader>q :wincmd q<CR>
 nnoremap <leader>u :UndotreeShow u<CR>
 nnoremap <leader>pv :wincmd v<bar> :Ex <bar> :vertical resize 30<CR>
 
-nnoremap <silent> <leader>gd :YcmCompleter GoTo<CR>
-nnoremap <silent> <leader>gf :YcmCompleter FixIt<CR>
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
