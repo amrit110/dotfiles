@@ -29,22 +29,6 @@ Plug 'rust-lang/rust.vim'
 Plug 'nvim-lua/completion-nvim'
 call plug#end()
 
-"Language servers"
-lua << EOF
-local nvim_lsp = require('lspconfig')
-local on_attach = function(client)
-    require'completion'.on_attach(client)
-end
--- Use a loop to conveniently call 'setup' on multiple servers and
--- map buffer local keybindings when the language server attaches
-local servers = { 'pyright', 'rust_analyzer' }
-for _, lsp in ipairs(servers) do
-  nvim_lsp[lsp].setup {
-    on_attach=on_attach,
-  }
-end
-EOF
-
 "Autocomplete"
 set completeopt=menuone,noinsert,noselect
 " let g:completion_matching_strategy_list = ['exact', 'substring', 'fuzzy']
@@ -75,6 +59,7 @@ nnoremap <leader>q :wincmd q<CR>
 nnoremap <leader>u :UndotreeShow u<CR>
 nnoremap <leader>pv :wincmd v<bar> :Ex <bar> :vertical resize 30<CR>
 
+"Language servers"
 lua << EOF
 local nvim_lsp = require('lspconfig')
 
