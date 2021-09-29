@@ -27,6 +27,7 @@ Plug 'mbbill/undotree'
 Plug 'kien/ctrlp.vim'
 Plug 'rust-lang/rust.vim'
 Plug 'nvim-lua/completion-nvim'
+Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 call plug#end()
 
 "Autocomplete"

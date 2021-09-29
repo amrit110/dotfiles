@@ -65,3 +65,10 @@ function dev_tmux() {
     tmux split-window -h -t 0;
     tmux a -t dev;
 }
+
+# pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
