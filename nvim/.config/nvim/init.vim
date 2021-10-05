@@ -34,6 +34,10 @@ call plug#end()
 set completeopt=menuone,noinsert,noselect
 " let g:completion_matching_strategy_list = ['exact', 'substring', 'fuzzy']
 
+"Python docstring gen
+let g:doge_doc_standard_python = 'numpy'
+
+
 "Gruvbox theme biatch"
 let g:gruvbox_bold=1 
 let g:gruvbox_contrast_dark='hard'
