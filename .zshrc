@@ -35,21 +35,6 @@ alias vim="nvim"
 alias tmux="TERM=screen-256color-bce tmux"
 alias ls="ls -lhFG"
 
-alias gs01="ssh amrit.krishnan@gpuserver01-mtl"
-alias gs02="ssh amrit.krishnan@gpuserver02-mtl"
-alias gs03="ssh amrit.krishnan@gpuserver03-mtl"
-alias gs04="ssh amrit.krishnan@gpuserver04-mtl"
-alias gs05="ssh amrit.krishnan@gpuserver05-mtl"
-alias gs06="ssh amrit.krishnan@gpuserver06-mtl"
-alias gs07="ssh amrit.krishnan@gpuserver07-mtl"
-alias gs08="ssh amrit.krishnan@gpuserver08-mtl"
-alias gs09="ssh amrit.krishnan@gpuserver09-mtl"
-alias gs01-mun="ssh amrit.krishnan@gpuserver01-mun"
-alias db01="ssh amrit.krishnan@dbserver01-mtl"
-alias st02="ssh amrit.krishnan@storage02-mtl"
-alias st01-mun="ssh amrit.krishnan@storage01-mun"
-alias linear="ssh amrit.krishnan@linear"
-
 # funcs
 function backup() {
     newname=$1.`date +%Y-%m-%d.%H.%M.bak`;
