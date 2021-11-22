@@ -57,3 +57,13 @@ export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
+
+# github
+export GITHUB_GIST_TOKEN="REDACTED_TOKEN"
+
+# Vector Compute
+alias vc="ssh amritk@v.vectorinstitute.ai"
+alias qc="ssh amritk@q.vectorinstitute.ai"
+alias mc="ssh amritk@m.vectorinstitute.ai"
+
+
