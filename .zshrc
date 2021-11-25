@@ -65,5 +65,3 @@ export GITHUB_GIST_TOKEN="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"
 alias vc="ssh amritk@v.vectorinstitute.ai"
 alias qc="ssh amritk@q.vectorinstitute.ai"
 alias mc="ssh amritk@m.vectorinstitute.ai"
-
-
