@@ -3,7 +3,10 @@ export ZSH="/Users/amritk/.oh-my-zsh"
 
 ZSH_THEME="agnoster"
 
-plugins=(git)
+plugins=(
+    git
+    zsh-autosuggestions
+)
 
 source $ZSH/oh-my-zsh.sh
 
