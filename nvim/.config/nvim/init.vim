@@ -69,6 +69,7 @@ nnoremap <leader>pv :wincmd v<bar> :Ex <bar> :vertical resize 30<CR>
 "Language servers"
 lua << EOF
 local nvim_lsp = require('lspconfig')
+local util = require('lspconfig/util')
 
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -101,21 +102,33 @@ local servers = {
             python = {
                 analysis = {
                     typeCheckingMode = "off"
-                    }
                 }
             }
-        } ,
+        },
+        root_dir = function(fname)
+            local root_files = {
+                'pyproject.toml',
+                'setup.py',
+                'setup.cfg',
+                'requirements.txt',
+                'Pipfile',
+                'pyrightconfig.json',
+                'venv',
+                }
+            return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+        end
+    },
     clangd = {
         settings = {}
-        },
+    },
     rust_analyzer = {
         settings = {}
-        }
     }
+}
 for server_name, configuration in pairs(servers) do
     nvim_lsp[server_name].setup {
         on_attach = on_attach,
         settings = configuration.settings,
-        }
+    }
 end
 EOF
