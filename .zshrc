@@ -32,6 +32,9 @@ fi
 bindkey -v
 bindkey jj vi-cmd-mode
 
+# zsh keybindings
+bindkey '^ ' autosuggest-accept
+
 # custom aliases
 alias python=python3
 alias vim="nvim"
@@ -68,3 +71,4 @@ export GITHUB_GIST_TOKEN="REDACTED_TOKEN"
 alias vc="ssh amritk@v.vectorinstitute.ai"
 alias qc="ssh amritk@q.vectorinstitute.ai"
 alias mc="ssh amritk@m.vectorinstitute.ai"
+alias vws71="ssh amritk@vws71"
