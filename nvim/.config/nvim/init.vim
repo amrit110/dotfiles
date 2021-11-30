@@ -118,8 +118,9 @@ local servers = {
             return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
         end
     },
-    clangd = {
-        settings = {}
+    ccls = {
+        filetypes = { "c", "cpp", "objc", "objcpp" },
+        root_dir = util.root_pattern(".git")
     },
     rust_analyzer = {
         settings = {}
