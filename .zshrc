@@ -57,12 +57,14 @@ function dev_tmux() {
     tmux a -t dev;
 }
 
-# pyenv
+# python
+alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
+alias pip=pip3
 
 # github
 export GITHUB_GIST_TOKEN="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"
