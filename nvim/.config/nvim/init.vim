@@ -20,25 +20,18 @@ highlight ColorColumn ctermbg=0 guibg=lightgrey
 "Plugins"
 call plug#begin('~/.vim/plugged')
 Plug 'gruvbox-community/gruvbox'
-Plug 'ambv/black'
 Plug 'neovim/nvim-lspconfig'
-Plug 'kabouzeid/nvim-lspinstall'
-Plug 'mbbill/undotree'
-Plug 'kien/ctrlp.vim'
-Plug 'rust-lang/rust.vim'
-Plug 'nvim-lua/completion-nvim'
-Plug 'tpope/vim-fugitive'
-Plug 'rbong/vim-flog'
+Plug 'williamboman/nvim-lsp-installer'
 Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'saadparwaiz1/cmp_luasnip'
+Plug 'L3MON4D3/LuaSnip'
+Plug 'rafamadriz/friendly-snippets'
 call plug#end()
-
-"Autocomplete"
-set completeopt=menuone,noinsert,noselect
-" let g:completion_matching_strategy_list = ['exact', 'substring', 'fuzzy']
 
 "Python docstring gen
 let g:doge_doc_standard_python = 'numpy'
-
 
 "Gruvbox theme biatch"
 let g:gruvbox_bold=1 
@@ -68,7 +61,7 @@ nnoremap <leader>pv :wincmd v<bar> :Ex <bar> :vertical resize 30<CR>
 
 "Language servers"
 lua << EOF
-local nvim_lsp = require('lspconfig')
+local lsp_installer = require("nvim-lsp-installer")
 local util = require('lspconfig/util')
 
 local on_attach = function(client, bufnr)
@@ -76,8 +69,6 @@ local on_attach = function(client, bufnr)
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
   local opts = { noremap=true, silent=true }
-
-  require'completion'.on_attach(client, bufnr)
 
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -96,6 +87,9 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>im', '<cmd>echo "Ivo\'s mom"<CR>', opts)
 end
 
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+
 local servers = {
     pyright = {
         settings = {
@@ -105,6 +99,7 @@ local servers = {
                 }
             }
         },
+        capabilities = capabilities,
         root_dir = function(fname)
             local root_files = {
                 'pyproject.toml',
@@ -126,10 +121,55 @@ local servers = {
         settings = {}
     }
 }
-for server_name, configuration in pairs(servers) do
-    nvim_lsp[server_name].setup {
-        on_attach = on_attach,
-        settings = configuration.settings,
-    }
-end
+
+lsp_installer.on_server_ready(function(server)
+    server:setup(servers[server.name])
+end)
+
+-- luasnip setup
+local luasnip = require 'luasnip'
+
+-- nvim-cmp setup
+local cmp = require 'cmp'
+cmp.setup {
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  mapping = {
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.close(),
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
+    ['<Tab>'] = function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end,
+    ['<S-Tab>'] = function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end,
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  },
+}
 EOF
