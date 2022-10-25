@@ -14,7 +14,7 @@ set incsearch
 set wildmenu
 set wildmode=longest,list,full
 
-set colorcolumn=80
+set colorcolumn=88
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
 "Plugins"
