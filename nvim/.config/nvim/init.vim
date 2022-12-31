@@ -13,8 +13,9 @@ set undofile
 set incsearch
 set wildmenu
 set wildmode=longest,list,full
+set updatetime=64
 
-set colorcolumn=88
+set colorcolumn=80
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
 "Plugins"
@@ -25,9 +26,6 @@ Plug 'williamboman/nvim-lsp-installer'
 Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'saadparwaiz1/cmp_luasnip'
-Plug 'L3MON4D3/LuaSnip'
-Plug 'rafamadriz/friendly-snippets'
 call plug#end()
 
 "Python docstring gen
@@ -40,6 +38,7 @@ autocmd vimenter * ++nested colorscheme gruvbox
 set background=dark
 
 if executable('rg')
+    set grepprg=rg\ -n\ \"$*\"
     let g:rg_derive_root='true'
 endif
 let mapleader = " "
@@ -88,14 +87,17 @@ local on_attach = function(client, bufnr)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 local servers = {
     pyright = {
         settings = {
             python = {
                 analysis = {
-                    typeCheckingMode = "off"
+                    typeCheckingMode = "off",
+                    autoSearchPaths = true,
+                    useLibraryCodeForTypes = true,
+                    diagnosticMode = "openFilesOnly",
                 }
             }
         },
@@ -113,10 +115,7 @@ local servers = {
             return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
         end
     },
-    ccls = {
-        filetypes = { "c", "cpp", "objc", "objcpp" },
-        root_dir = util.root_pattern(".git")
-    },
+    ccls = {},
     rust_analyzer = {
         settings = {}
     }
@@ -125,9 +124,6 @@ local servers = {
 lsp_installer.on_server_ready(function(server)
     server:setup(servers[server.name])
 end)
-
--- luasnip setup
-local luasnip = require 'luasnip'
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
@@ -151,8 +147,6 @@ cmp.setup {
     ['<Tab>'] = function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
       else
         fallback()
       end
@@ -160,8 +154,6 @@ cmp.setup {
     ['<S-Tab>'] = function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
       else
         fallback()
       end
@@ -169,43 +161,10 @@ cmp.setup {
   },
   sources = {
     { name = 'nvim_lsp' },
-    { name = 'luasnip' },
   },
 }
 EOF
 
-" Google python sytle
-setlocal indentexpr=GetGooglePythonIndent(v:lnum)
-
-let s:maxoff = 50 " maximum number of lines to look backwards.
-
-function GetGooglePythonIndent(lnum)
-
-  " Indent inside parens.
-  " Align with the open paren unless it is at the end of the line.
-  " E.g.
-  "   open_paren_not_at_EOL(100,
-  "                         (200,
-  "                          300),
-  "                         400)
-  "   open_paren_at_EOL(
-  "       100, 200, 300, 400)
-  call cursor(a:lnum, 1)
-  let [par_line, par_col] = searchpairpos('(\|{\|\[', '', ')\|}\|\]', 'bW',
-        \ "line('.') < " . (a:lnum - s:maxoff) . " ? dummy :"
-        \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
-        \ . " =~ '\\(Comment\\|String\\)$'")
-  if par_line > 0
-    call cursor(par_line, 1)
-    if par_col != col("$") - 1
-      return par_col
-    endif
-  endif
-
-  " Delegate the rest to the original function.
-  return GetPythonIndent(a:lnum)
-
-endfunction
-
-let pyindent_nested_paren="&sw*2"
-let pyindent_open_paren="&sw*2"
+"Github copilot"
+imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
