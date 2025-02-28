@@ -19,9 +19,6 @@ set updatetime=64
 set timeoutlen=300  " Reduce delay after leader key press
 set clipboard+=unnamedplus  " System clipboard integration
 
-set colorcolumn=88
-highlight ColorColumn ctermbg=0 guibg=lightgrey
-
 "Plugins"
 call plug#begin('~/.vim/plugged')
 Plug 'gruvbox-community/gruvbox'
@@ -38,8 +35,10 @@ let g:doge_doc_standard_python = 'numpy'
 "Gruvbox theme"
 let g:gruvbox_bold=1 
 let g:gruvbox_contrast_dark='hard'
-autocmd vimenter * ++nested colorscheme gruvbox
 set background=dark
+autocmd vimenter * ++nested colorscheme gruvbox
+autocmd ColorScheme gruvbox highlight ColorColumn ctermbg=0 guibg=lightgrey
+set colorcolumn=88
 
 if executable('rg')
     set grepprg=rg\ -n\ \"$*\"
