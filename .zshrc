@@ -29,7 +29,7 @@ bindkey '^ ' autosuggest-accept
 
 # custom aliases
 alias python=python3
-alias vim="nvim"
+alias vim="nvim -u ~/.config/nvim/init.vim"
 alias tmux="TERM=screen-256color-bce tmux"
 alias ls="ls -lhFG"
 
@@ -70,12 +70,25 @@ alias vws9="ssh vws9@10.6.10.127"
 
 # Add to PATH
 export PATH="${HOME}/.local/bin:$PATH"
+export PATH="${HOME}/.cargo/bin:$PATH"
 export PATH="${HOME}/.local/share/nvim:${PATH}"
 export PATH="/usr/local/cuda-11.5/bin:${PATH}"
 export LD_LIBRARY_PATH="/usr/local/cuda-11.5/lib64:$LD_LIBRARY_PATH"
+export LDFLAGS="-L/opt/homebrew/opt/openblas/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/openblas/include"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # tmux
 alias tmux="TERM=screen-256color-bce tmux"
+export PATH="/opt/homebrew/opt/sqlite/bin:$PATH"
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export PATH="/opt/homebrew/opt/sqlite/bin:$PATH"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/amritkrishnan/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/amritkrishnan/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/amritkrishnan/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/amritkrishnan/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
