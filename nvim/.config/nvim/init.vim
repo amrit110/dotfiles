@@ -15,6 +15,10 @@ set wildmenu
 set wildmode=longest,list,full
 set updatetime=64
 
+"⚡️ Leader key timeout adjustment ⚡️"
+set timeoutlen=300  " Reduce delay after leader key press
+set clipboard+=unnamedplus  " System clipboard integration
+
 set colorcolumn=88
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
@@ -31,7 +35,7 @@ call plug#end()
 "Python docstring gen
 let g:doge_doc_standard_python = 'numpy'
 
-"Gruvbox theme biatch"
+"Gruvbox theme"
 let g:gruvbox_bold=1 
 let g:gruvbox_contrast_dark='hard'
 autocmd vimenter * ++nested colorscheme gruvbox
@@ -41,13 +45,17 @@ if executable('rg')
     set grepprg=rg\ -n\ \"$*\"
     let g:rg_derive_root='true'
 endif
-let mapleader = " "
+
+"⚡️ Explicit leader definition ⚡️"
+let mapleader = "\<Space>"  " Explicit space leader
 let g:netrw_browse_split = 3
 let g:netrw_winsize = 25
 let g:netrw_banner = 0
 
 "Key remappings"
 inoremap jj <ESC>
+
+"⚡️ Improved window mappings with descriptions ⚡️"
 nnoremap <leader>h :wincmd h<CR>
 nnoremap <leader>j :wincmd j<CR>
 nnoremap <leader>k :wincmd k<CR>
@@ -57,6 +65,14 @@ nnoremap <leader>v :wincmd v<CR>
 nnoremap <leader>q :wincmd q<CR>
 nnoremap <leader>u :UndotreeShow u<CR>
 nnoremap <leader>pv :wincmd v<bar> :Ex <bar> :vertical resize 30<CR>
+
+"⚡️ Global Ivo's mom mapping ⚡️"
+nnoremap <leader>im :echo "Ivo's mom"<CR>
+
+"Clipboard integration ⚡️"
+vnoremap <leader>y "+y
+nnoremap <leader>Y "+yg_
+nnoremap <leader>y "+y
 
 "Language servers"
 lua << EOF
@@ -69,21 +85,20 @@ local on_attach = function(client, bufnr)
 
   local opts = { noremap=true, silent=true }
 
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  -- LSP mappings
   buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
   buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', '<leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  buf_set_keymap('n', '<leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
-  buf_set_keymap('n', '<space>im', '<cmd>echo "Ivo\'s mom"<CR>', opts)
+  buf_set_keymap('n', '<leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  buf_set_keymap('n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -121,8 +136,14 @@ local servers = {
     }
 }
 
+-- ⚡️ Safer server setup ⚡️
 lsp_installer.on_server_ready(function(server)
-    server:setup(servers[server.name])
+    local success, _ = pcall(function()
+        server:setup(servers[server.name])
+    end)
+    if not success then
+        vim.notify("Failed to setup server: " .. server.name, vim.log.levels.WARN)
+    end
 end)
 
 -- nvim-cmp setup
