@@ -58,7 +58,6 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
-# pyenv-virtualenv plugin is deprecated, removed virtualenv-init
 alias pip=pip3
 
 # github
