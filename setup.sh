@@ -75,7 +75,7 @@ install_package_manager() {
         macos)
             if ! command_exists brew; then
                 info "Installing Homebrew..."
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
                 # Add Homebrew to PATH for Apple Silicon Macs
                 if [[ -f "/opt/homebrew/bin/brew" ]]; then
                     export PATH="/opt/homebrew/bin:$PATH"
@@ -184,10 +184,12 @@ install_oh_my_zsh() {
         success "Oh My Zsh already installed"
         return
     fi
-    
+
     info "Installing Oh My Zsh..."
     export RUNZSH=no  # Don't run zsh after installation
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    export CHSH=no    # Don't prompt to change shell
+    export KEEP_ZSHRC=yes  # Keep existing .zshrc
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 }
 
 # Install Powerlevel10k theme
@@ -321,9 +323,41 @@ install_neovim_deps() {
         esac
     fi
     
-    # Install Python support
+    # Install Python support for Neovim
     if command_exists python3; then
-        python3 -m pip install --user pynvim
+        local platform="$(detect_platform)"
+        case "$platform" in
+            linux)
+                # Try system package manager first (handles PEP 668 externally-managed-environment)
+                if command_exists apt-get; then
+                    if ! dpkg -l | grep -q "^ii  python3-pynvim "; then
+                        info "Installing python3-pynvim via apt..."
+                        sudo apt-get install -y python3-pynvim 2>/dev/null || {
+                            warning "Could not install python3-pynvim via apt, trying pip..."
+                            python3 -m pip install --user --break-system-packages pynvim 2>/dev/null || \
+                                warning "Could not install pynvim. Install manually if needed: pip install pynvim"
+                        }
+                    fi
+                elif command_exists yum; then
+                    sudo yum install -y python3-neovim 2>/dev/null || \
+                        python3 -m pip install --user pynvim 2>/dev/null || \
+                        warning "Could not install pynvim. Install manually if needed: pip install pynvim"
+                elif command_exists pacman; then
+                    sudo pacman -S --needed --noconfirm python-pynvim 2>/dev/null || \
+                        python3 -m pip install --user pynvim 2>/dev/null || \
+                        warning "Could not install pynvim. Install manually if needed: pip install pynvim"
+                else
+                    # Fallback to pip with break-system-packages
+                    python3 -m pip install --user --break-system-packages pynvim 2>/dev/null || \
+                        warning "Could not install pynvim. Install manually if needed: pip install pynvim"
+                fi
+                ;;
+            macos)
+                # On macOS, pip should work fine
+                python3 -m pip install --user pynvim 2>/dev/null || \
+                    warning "Could not install pynvim. Install manually if needed: pip install pynvim"
+                ;;
+        esac
     fi
 }
 
@@ -333,18 +367,17 @@ install_powershell() {
         success "PowerShell already installed"
         return
     fi
-    
-    local platform="$(detect_platform)"
-    
-    read -p "Would you like to install PowerShell? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        info "Skipping PowerShell installation"
+
+    # Skip PowerShell installation by default in automated mode
+    # Set INSTALL_POWERSHELL=1 environment variable to enable
+    if [[ "${INSTALL_POWERSHELL:-0}" != "1" ]]; then
+        info "Skipping PowerShell installation (set INSTALL_POWERSHELL=1 to install)"
         return
     fi
-    
+
+    local platform="$(detect_platform)"
     info "Installing PowerShell..."
-    
+
     case "$platform" in
         macos)
             if command_exists brew; then
@@ -418,19 +451,23 @@ set_zsh_default() {
         success "Zsh is already the default shell"
         return
     fi
-    
+
     info "Setting Zsh as default shell..."
-    
+
     # Add zsh to /etc/shells if it's not there
     local zsh_path
     zsh_path=$(which zsh)
-    if ! grep -q "$zsh_path" /etc/shells; then
-        echo "$zsh_path" | sudo tee -a /etc/shells
+    if ! grep -q "$zsh_path" /etc/shells 2>/dev/null; then
+        echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
     fi
-    
-    # Change default shell
-    chsh -s "$zsh_path"
-    success "Default shell changed to Zsh (restart terminal to take effect)"
+
+    # Change default shell (may require password on some systems)
+    # On macOS with admin privileges, this should work without password
+    if chsh -s "$zsh_path" 2>/dev/null; then
+        success "Default shell changed to Zsh (restart terminal to take effect)"
+    else
+        warning "Could not change default shell automatically. Run manually: chsh -s $zsh_path"
+    fi
 }
 
 # Clean up sensitive information from config files
