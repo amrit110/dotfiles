@@ -75,8 +75,16 @@ nnoremap <leader>y "+y
 
 "Language servers"
 lua << EOF
-local lsp_installer = require("nvim-lsp-installer")
-local util = require('lspconfig/util')
+-- Wrap in pcall to avoid errors during initial plugin installation
+local success, lsp_installer = pcall(require, "nvim-lsp-installer")
+if not success then
+  return
+end
+
+local util_success, util = pcall(require, 'lspconfig/util')
+if not util_success then
+  return
+end
 
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -101,7 +109,10 @@ local on_attach = function(client, bufnr)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+local cmp_lsp_success, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
+if cmp_lsp_success then
+  capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
+end
 
 local servers = {
     pyright = {
@@ -146,11 +157,18 @@ lsp_installer.on_server_ready(function(server)
 end)
 
 -- nvim-cmp setup
-local cmp = require 'cmp'
+local cmp_success, cmp = pcall(require, 'cmp')
+if not cmp_success then
+  return
+end
+
 cmp.setup {
   snippet = {
     expand = function(args)
-      require('luasnip').lsp_expand(args.body)
+      local luasnip_success, luasnip = pcall(require, 'luasnip')
+      if luasnip_success then
+        luasnip.lsp_expand(args.body)
+      end
     end,
   },
   mapping = {
