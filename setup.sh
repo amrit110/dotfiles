@@ -387,6 +387,13 @@ install_powershell() {
         linux)
             if command_exists apt-get; then
                 # Ubuntu/Debian
+
+                # Remove any existing Microsoft repository configuration
+                if [[ -f /etc/apt/sources.list.d/microsoft-prod.list ]]; then
+                    info "Removing old Microsoft repository configuration..."
+                    sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+                fi
+
                 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
 
                 # Determine Ubuntu version and use appropriate repository
