@@ -388,7 +388,20 @@ install_powershell() {
             if command_exists apt-get; then
                 # Ubuntu/Debian
                 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-                echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -rs)-prod $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+
+                # Determine Ubuntu version and use appropriate repository
+                local ubuntu_version=$(lsb_release -rs)
+                local ubuntu_codename=$(lsb_release -cs)
+
+                # Microsoft doesn't always have repos for the latest Ubuntu version immediately
+                # Fall back to 22.04 (jammy) repo for newer versions
+                if [[ "$ubuntu_version" == "24.04" ]] || [[ ! $(curl -s -o /dev/null -w "%{http_code}" "https://packages.microsoft.com/repos/microsoft-ubuntu-${ubuntu_version}-prod/dists/${ubuntu_codename}/Release") == "200" ]]; then
+                    warning "Using Ubuntu 22.04 repository for PowerShell (24.04 not yet available)"
+                    echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-22.04-prod jammy main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+                else
+                    echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-${ubuntu_version}-prod ${ubuntu_codename} main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+                fi
+
                 sudo apt-get update
                 sudo apt-get install -y powershell
             fi
