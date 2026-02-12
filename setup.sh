@@ -85,14 +85,6 @@ install_package_manager() {
             fi
             ;;
         linux)
-            # Clean up any broken Microsoft repository from previous failed attempts
-            if command_exists apt-get && [[ -f /etc/apt/sources.list.d/microsoft-prod.list ]]; then
-                if grep -q "microsoft-ubuntu-24.04-prod" /etc/apt/sources.list.d/microsoft-prod.list 2>/dev/null; then
-                    info "Removing broken Microsoft repository configuration..."
-                    sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-                fi
-            fi
-
             # Update package lists
             if command_exists apt-get; then
                 sudo apt-get update
@@ -394,24 +386,46 @@ install_powershell() {
             ;;
         linux)
             if command_exists apt-get; then
-                # Ubuntu/Debian
-                curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+                # Ubuntu/Debian - Use official Microsoft method
+                # Install prerequisites
+                sudo apt-get install -y wget apt-transport-https software-properties-common
 
-                # Determine Ubuntu version and use appropriate repository
-                local ubuntu_version=$(lsb_release -rs)
-                local ubuntu_codename=$(lsb_release -cs)
+                # Get Ubuntu version
+                source /etc/os-release
 
-                # Microsoft doesn't always have repos for the latest Ubuntu version immediately
-                # Fall back to 22.04 (jammy) repo for newer versions
-                if [[ "$ubuntu_version" == "24.04" ]] || [[ ! $(curl -s -o /dev/null -w "%{http_code}" "https://packages.microsoft.com/repos/microsoft-ubuntu-${ubuntu_version}-prod/dists/${ubuntu_codename}/Release") == "200" ]]; then
-                    warning "Using Ubuntu 22.04 repository for PowerShell (24.04 not yet available)"
-                    echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-22.04-prod jammy main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+                # Download and register Microsoft repository configuration
+                # This method automatically sets up the correct repository for the Ubuntu version
+                local temp_deb="/tmp/packages-microsoft-prod.deb"
+                info "Downloading Microsoft repository configuration for Ubuntu $VERSION_ID..."
+                wget -q "https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb" -O "$temp_deb"
+
+                if [[ -f "$temp_deb" ]]; then
+                    info "Registering Microsoft repository..."
+                    sudo dpkg -i "$temp_deb"
+                    rm -f "$temp_deb"
+
+                    # Update package lists and install PowerShell
+                    sudo apt-get update
+                    sudo apt-get install -y powershell
                 else
-                    echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-${ubuntu_version}-prod ${ubuntu_codename} main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
-                fi
+                    error "Failed to download Microsoft repository configuration"
+                    warning "Falling back to direct .deb package installation..."
 
-                sudo apt-get update
-                sudo apt-get install -y powershell
+                    # Fallback: Install PowerShell directly from GitHub releases (LTS version)
+                    local pwsh_version="7.4.13"
+                    local pwsh_deb="/tmp/powershell_${pwsh_version}-1.deb_amd64.deb"
+                    info "Downloading PowerShell ${pwsh_version} (LTS) directly..."
+                    wget -q "https://github.com/PowerShell/PowerShell/releases/download/v${pwsh_version}/powershell_${pwsh_version}-1.deb_amd64.deb" -O "$pwsh_deb"
+
+                    if [[ -f "$pwsh_deb" ]]; then
+                        info "Installing PowerShell..."
+                        sudo dpkg -i "$pwsh_deb"
+                        sudo apt-get install -f -y  # Resolve any missing dependencies
+                        rm -f "$pwsh_deb"
+                    else
+                        error "Failed to download PowerShell package"
+                    fi
+                fi
             fi
             ;;
     esac
