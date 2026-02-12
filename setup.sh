@@ -85,6 +85,13 @@ install_package_manager() {
             fi
             ;;
         linux)
+            # Clean up any old Microsoft repository configuration from previous failed attempts
+            # The PowerShell installation will create a fresh one using the official method
+            if command_exists apt-get && [[ -f /etc/apt/sources.list.d/microsoft-prod.list ]]; then
+                info "Removing old Microsoft repository configuration..."
+                sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+            fi
+
             # Update package lists
             if command_exists apt-get; then
                 sudo apt-get update
