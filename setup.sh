@@ -70,7 +70,7 @@ backup_file() {
 # Install package manager based on platform
 install_package_manager() {
     local platform="$1"
-    
+
     case "$platform" in
         macos)
             if ! command_exists brew; then
@@ -85,6 +85,14 @@ install_package_manager() {
             fi
             ;;
         linux)
+            # Clean up any broken Microsoft repository from previous failed attempts
+            if command_exists apt-get && [[ -f /etc/apt/sources.list.d/microsoft-prod.list ]]; then
+                if grep -q "microsoft-ubuntu-24.04-prod" /etc/apt/sources.list.d/microsoft-prod.list 2>/dev/null; then
+                    info "Removing broken Microsoft repository configuration..."
+                    sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+                fi
+            fi
+
             # Update package lists
             if command_exists apt-get; then
                 sudo apt-get update
@@ -387,13 +395,6 @@ install_powershell() {
         linux)
             if command_exists apt-get; then
                 # Ubuntu/Debian
-
-                # Remove any existing Microsoft repository configuration
-                if [[ -f /etc/apt/sources.list.d/microsoft-prod.list ]]; then
-                    info "Removing old Microsoft repository configuration..."
-                    sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-                fi
-
                 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
 
                 # Determine Ubuntu version and use appropriate repository
