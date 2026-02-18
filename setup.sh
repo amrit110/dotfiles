@@ -104,6 +104,42 @@ install_package_manager() {
     esac
 }
 
+# Install Neovim 0.11+ from GitHub releases (more reliable than PPA)
+install_neovim_from_github() {
+    local arch
+    arch=$(uname -m)
+    local nvim_tarball
+
+    case "$arch" in
+        x86_64)  nvim_tarball="nvim-linux-x86_64.tar.gz" ;;
+        aarch64) nvim_tarball="nvim-linux-arm64.tar.gz" ;;
+        *)
+            warning "Unsupported architecture $arch for direct Neovim install"
+            return 1
+            ;;
+    esac
+
+    local nvim_url="https://github.com/neovim/neovim/releases/download/stable/${nvim_tarball}"
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+
+    info "Downloading Neovim stable from GitHub releases..."
+    if wget -q "$nvim_url" -O "${tmp_dir}/${nvim_tarball}"; then
+        local extract_dir
+        extract_dir=$(tar tzf "${tmp_dir}/${nvim_tarball}" 2>/dev/null | head -1 | cut -d/ -f1)
+        sudo rm -rf /opt/nvim-linux-*
+        sudo tar xzf "${tmp_dir}/${nvim_tarball}" -C /opt/
+        sudo ln -sf "/opt/${extract_dir}/bin/nvim" /usr/local/bin/nvim
+        rm -rf "$tmp_dir"
+        success "Neovim $(nvim --version | head -n1) installed from GitHub releases"
+        return 0
+    else
+        warning "Failed to download Neovim from GitHub releases"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+}
+
 # Install essential tools
 install_essentials() {
     local platform="$1"
@@ -146,19 +182,42 @@ install_essentials() {
         linux)
             # Determine package manager and install
             if command_exists apt-get; then
+                    # Install Neovim 0.11+ — try GitHub releases first, fall back to PPA
+                local needs_nvim_install=true
+                if command_exists nvim; then
+                    local nvim_version=$(nvim --version | head -n1 | grep -oP 'v\K[0-9]+\.[0-9]+' || echo "0.0")
+                    local major=$(echo "$nvim_version" | cut -d. -f1)
+                    local minor=$(echo "$nvim_version" | cut -d. -f2)
+                    if [[ "$major" -ge 1 ]] || [[ "$minor" -ge 11 ]]; then
+                        success "Neovim $nvim_version already up to date"
+                        needs_nvim_install=false
+                    else
+                        info "Neovim $nvim_version detected, upgrading to 0.11+..."
+                    fi
+                fi
+
+                if [[ "$needs_nvim_install" == "true" ]]; then
+                    if ! install_neovim_from_github; then
+                        info "Falling back to Neovim PPA..."
+                        sudo apt-get install -y software-properties-common
+                        sudo add-apt-repository -y ppa:neovim-ppa/stable
+                        sudo apt-get update
+                        sudo apt-get install -y neovim
+                    fi
+                fi
+
                 local packages=(
                     "git"
                     "curl"
                     "wget"
                     "zsh"
                     "tmux"
-                    "neovim"
                     "ripgrep"
                     "fd-find"
                     "fzf"
                     "build-essential"
                 )
-                
+
                 for package in "${packages[@]}"; do
                     if dpkg -l | grep -q "^ii  $package "; then
                         success "$package already installed"
