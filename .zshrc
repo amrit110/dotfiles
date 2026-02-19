@@ -61,7 +61,7 @@ eval "$(pyenv init -)"
 alias pip=pip3
 
 # github
-export GITHUB_GIST_TOKEN="REDACTED_TOKEN"
+export GITHUB_GIST_TOKEN=""  # Set your token here (do not commit)
 
 # Vector Compute
 alias vc="ssh amritk@v.vectorinstitute.ai"
