@@ -32,7 +32,12 @@ Plug 'coder/claudecode.nvim'
 call plug#end()
 
 lua << EOF
-require("claudecode").setup()
+require("claudecode").setup({
+  terminal = {
+    split_side = "left",
+    split_width_percentage = 0.5,
+  },
+})
 
 vim.keymap.set("n", "<leader>ac", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" })
 vim.keymap.set("n", "<leader>af", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" })
